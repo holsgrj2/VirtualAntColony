@@ -24,10 +24,20 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 	int resting = 0;
 	
 	//the player's ship
-	int ANTS = 100;
+	final int ANTS = 100;
 	Ant [] ant = new Ant[ANTS];
 	
+	//the food
+	final int FOODS = 5;
+	Food [] food = new Food[FOODS];
+	
+	//the food points
+	ArrayList<FoodPoint> foodpoints = new ArrayList<FoodPoint>();
+	
 	Enemy ship = new Enemy();
+	
+	//the ant's Nest
+	Nest nest = new Nest();
 	
 	//create the identity transform(0,0)
 	AffineTransform identity = new AffineTransform();
@@ -51,7 +61,10 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		
 		ship.setX(60);
 		ship.setY(60);
-		
+		//set up food
+		for(int i = 0; i < FOODS; i++){
+			food[i] = new Food();
+		}
 		//start the user input listener
 		addKeyListener(this);
 	}
@@ -74,7 +87,8 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		//draw the game graphics
 		drawShip();
 		drawEnemy();
-		
+		drawFood();
+		drawNest();
 		//repaint the applet window
 		paint(g);
 	}
@@ -96,6 +110,26 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		g2d.rotate(Math.toRadians(ship.getFaceAngle()));
 		g2d.setColor(Color.PINK);
 		g2d.fill(ship.getShape());
+	}
+	
+	public void drawFood(){
+		for(int i = 0; i < FOODS; i++){
+			g2d.setTransform(identity);
+			g2d.translate(food[i].getX(),food[i].getY());
+			g2d.rotate(Math.toRadians(food[i].getFaceAngle()));
+			if(food[i].getFoodLevel() == 0)
+				g2d.setColor(Color.BLACK);
+			else
+				g2d.setColor(Color.BLUE);
+			g2d.fill(food[i].getShape());
+		}
+	}
+	
+	public void drawNest(){
+		g2d.setTransform(identity);
+		g2d.translate(nest.getX(),nest.getY());
+		g2d.setColor(Color.GREEN);
+		g2d.fill(nest.getShape());
 	}
 
 	//applet window repaint event -- draw the back buffer
@@ -139,7 +173,7 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		
 		updateAnt();
 		updateEnemy();
-		
+		updateFoodPoints();
 		
 		//checkCollisions();
 	}
@@ -222,6 +256,13 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 			else if(ship.getY() > 480 + 5)
 				ship.setY(480 - 5);
 			
+		}
+		
+		
+	//update foodpoints
+		public void updateFoodPoints(){
+			for(int i = 0; i < foodpoints.size(); i++)
+				foodpoints.get(i).decrementStr();
 		}
 		
 	//keeps face angle in range 0-360
