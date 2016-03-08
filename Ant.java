@@ -8,27 +8,73 @@ public class Ant extends BaseVectorShape{
 	private int [] antx = {-3, -1, 0, 1, 3, 0};
 	private int [] anty = {3, 3, 3, 3, 3, -3};
 	//define arraylist of breadcrumbs for finding nest
-	private ArrayList<Point2D.Double> breadcrumbs = new ArrayList<Point2D.Double>();
+	public ArrayList<Point2D.Double> breadcrumbs = new ArrayList<Point2D.Double>();
 	//value for food
 	private boolean hasFood;
+	
+	private boolean beenChecked;
+	
+	private boolean onWayHome;
 	//value for incrementing through breadcrumbs on way home
 	private int distNest;
 	//the distance an ant can search
 	private double searchRadius = 5.0;
 	//bounding rectangle
+	
 	public Rectangle getBounds(){
 		Rectangle r;
 		r = new Rectangle((int)getX() - 6, (int)getY() - 6, 12,12);
 		return r;
 	}
+	
+	public Rectangle getRadius(){
+		Rectangle r;
+		r = new Rectangle((int)getX() -19 , (int)getY() - 19, 40,40);
+		return r;
+	}
+	
+	public Rectangle getDangerPheromone(){
+		Rectangle r;
+		r = new Rectangle((int)getX() -30 , (int)getY() - 30, 60,60);
+		return r;
+	}
+	
 	Ant(){
 		setShape(new Polygon(antx,anty,antx.length));
 		setAlive(true);
 		distNest = 0;
 		hasFood = false;
-		
-		
+		onWayHome = false;
+		beenChecked = false;
 	}
+	
+	public void checkFaceAngle() {
+		double faceAngle = getFaceAngle();
+		if(faceAngle > 180){
+			setFaceAngle(faceAngle - 180);
+		}
+		else{
+			setFaceAngle(faceAngle + 180);
+		}
+	}
+	
+	public boolean getBeenChecked(){
+		return beenChecked;
+	}
+	
+	public void setBeenChecked(boolean b){
+		this.beenChecked = b;
+	}
+	
+	public boolean getOnWayHome(){
+		return onWayHome;
+	}
+	public void goHome(){onWayHome = true;}
+	
+	public int getDistnest(){
+		return distNest;
+	}
+	
 	//add crumbs for every scouting step
 	public void putBreadcrumb(){
 		breadcrumbs.add(new Point2D.Double(getX(), getY()));
@@ -40,8 +86,10 @@ public class Ant extends BaseVectorShape{
 	public boolean foodState(){ return hasFood;}
 	//get next step to home
 	public Point2D.Double getNestMove(){
-		Point2D.Double breadcrumb = breadcrumbs.get(distNest);
 		distNest--;
+		Point2D.Double breadcrumb = breadcrumbs.get(distNest);
+		if(distNest == 0)
+			onWayHome = false;
 		return breadcrumb;
 	}
 	//return the strongest foodpoint in range, if none found return a foodpoint located at (0.0,0.0)
@@ -66,7 +114,7 @@ public class Ant extends BaseVectorShape{
 	{
 		Food bestFood = new Food(0);
 		int highestFood = 0;
-		for(int i = 0; i <= 5; i++){
+		for(int i = 0; i < 5; i++){
 			if(isInRadius(food[i].getX(),food[i].getY())){
 				if(food[i].getFoodLevel() > highestFood){
 					bestFood = food[i];

@@ -3,8 +3,8 @@ import java.awt.Rectangle;
 public class Nest extends BaseVectorShape{
 	//define the polygon
 	private int foodStock;
-	private int [] shipx = {0, -20, -14, 6, 14, 20};
-	private int [] shipy = {-20, -4, 20, 14, 20, -4};
+	private int [] shipx = {0, -25, -40, -25, 0, 14};
+	private int [] shipy = {0, 0, -20, -40, -40, -20};
 	
 	//bounding rectangle
 	public Rectangle getBounds(){
@@ -15,8 +15,8 @@ public class Nest extends BaseVectorShape{
 	Nest(){
 		setShape(new Polygon(shipx,shipy,shipx.length));
 		foodStock = 0;
-		setX(320);
-		setY(240);
+		setX(333);
+		setY(260);
 	}
 	public void addStock(){foodStock++;}
 	public void feed(){if(foodStock>0) foodStock--;}

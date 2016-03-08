@@ -34,7 +34,7 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 	//the food points
 	ArrayList<FoodPoint> foodpoints = new ArrayList<FoodPoint>();
 	
-	Enemy ship = new Enemy();
+	Enemy enemy = new Enemy();
 	
 	//the ant's Nest
 	Nest nest = new Nest();
@@ -59,8 +59,8 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 			changeDirection(ant[i]);
 		}
 		
-		ship.setX(60);
-		ship.setY(60);
+		enemy.setX(60);
+		enemy.setY(60);
 		//set up food
 		for(int i = 0; i < FOODS; i++){
 			food[i] = new Food();
@@ -85,12 +85,26 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		//g2d.drawString("Face angle: " + Math.round(ant.getFaceAngle()), 5, 40);
 		
 		//draw the game graphics
+		drawBounds();
+		drawBreadcrumbs();
 		drawShip();
 		drawEnemy();
 		drawFood();
 		drawNest();
+		
 		//repaint the applet window
 		paint(g);
+	}
+	
+	public void drawBounds(){
+		if(showBounds){
+			g2d.setColor(Color.WHITE);
+			g2d.draw(enemy.getBounds());
+			for(int i = 0; i < ANTS; i++){
+				//g2d.draw(ant[i].getRadius());
+				g2d.draw(ant[i].getDangerPheromone());
+			}
+		}
 	}
 	
 	//drawShip called by applet update event
@@ -101,15 +115,15 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 			g2d.rotate(Math.toRadians(ant[i].getFaceAngle()));
 			g2d.setColor(Color.RED);
 			g2d.fill(ant[i].getShape());
+			}
 		}
-	}
 	
 	public void drawEnemy(){
 		g2d.setTransform(identity);
-		g2d.translate(ship.getX(),ship.getY());
-		g2d.rotate(Math.toRadians(ship.getFaceAngle()));
+		g2d.translate(enemy.getX(),enemy.getY());
+		g2d.rotate(Math.toRadians(enemy.getFaceAngle()));
 		g2d.setColor(Color.PINK);
-		g2d.fill(ship.getShape());
+		g2d.fill(enemy.getShape());
 	}
 	
 	public void drawFood(){
@@ -125,11 +139,21 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		}
 	}
 	
+	public void drawBreadcrumbs(){
+		for(int i = 0; i < ANTS; i++){
+			for(int j = 0; j < ant[i].breadcrumbs.size(); j++){
+				g2d.setColor(Color.WHITE);
+				g2d.fillRect((int)ant[i].breadcrumbs.get(j).x,(int)ant[i].breadcrumbs.get(j).y,2,2);
+			}
+		}
+	}
+	
 	public void drawNest(){
 		g2d.setTransform(identity);
 		g2d.translate(nest.getX(),nest.getY());
 		g2d.setColor(Color.GREEN);
-		g2d.fill(nest.getShape());
+	    g2d.setStroke(new BasicStroke(5));
+		g2d.draw(nest.getShape());
 	}
 
 	//applet window repaint event -- draw the back buffer
@@ -170,17 +194,43 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 	}
 	//move and animate the objects in the game
 	private void gameUpdate(){
-		
+		checkCollisions();
 		updateAnt();
 		updateEnemy();
 		updateFoodPoints();
-		
-		//checkCollisions();
 	}
 	
 	public void changeDirection(Ant ant){
 			int randomFaceAngle = rand.nextInt((360 - 0) + 1) + 0;
 			ant.setFaceAngle(randomFaceAngle);
+	}
+	
+	public static double getAngle(double x, double y, Ant centerPt) //getAngle(nearest.x,nearest.y,ant[i]
+	{
+	    double theta = Math.atan2(y - centerPt.getY(), x - centerPt.getX());
+	    theta += Math.PI/2.0;
+	    double angle = Math.toDegrees(theta);
+	    if (angle < 0) {
+	        angle += 360;
+	    }
+	    return angle;
+	}
+	
+	public double getDistanceToEnemy(Enemy e, Ant a){
+		return (Math.sqrt(Math.pow((e.getX() - a.getX()), 2) + 
+				Math.pow((e.getY() - a.getY()), 2)));
+	}
+	
+	public double getDistanceToAnt(Ant b, Ant a){
+		return (Math.sqrt(Math.pow((b.getX() - a.getX()), 2) + 
+				Math.pow((b.getY() - a.getY()), 2)));
+	}
+	
+public void getAway(Enemy e, Ant a){
+		double faceAngle = getAngle(e.getX(), e.getY(), a);
+		System.out.println("faceAngle 1 " + faceAngle);
+		a.checkFaceAngle();
+		System.out.println("faceAngle 2 " +faceAngle);
 	}
 	
 	//Update the ship position based on velocity
@@ -198,11 +248,37 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		
 			if(resting == 5){//how many steps before ant changes the way it is facing.
 				System.out.println(resting);
-				changeDirection(ant[i]);
 				if(i == ANTS - 1){
 					resting = 0;
 				}
+				
+				if(getDistanceToEnemy(enemy, ant[i]) > 15 && ant[i].getBeenChecked() == true){
+					ant[i].setBeenChecked(false);
+				//	System.out.println(getDistance(enemy, ant[i]));
+					System.out.println("unchecked");
+				}
+				
+				if(ant[i].getOnWayHome() == false){
+					ant[i].putBreadcrumb();
+					changeDirection(ant[i]);
+				}
+				
+				if(ant[i].getDistnest() == 20){
+					ant[i].goHome();
+				}
+				if(ant[i].getOnWayHome() == true)
+				{
+					Point2D.Double nearest = ant[i].getNestMove();
+					ant[i].setFaceAngle(getAngle(nearest.x,nearest.y,ant[i]));
+					
+				}
 			}
+			
+			System.out.println(ant[i].getDistnest());
+			System.out.println(ant[i].getOnWayHome());
+			
+			
+			
 			//update ship X's position, distance the ant moves in one step
 			ant[i].incX(ant[i].getVelX() * 5);
 			//System.out.println(ant.getVelX());
@@ -240,24 +316,21 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 	//Update the ship position based on velocity
 		public void updateEnemy(){
 			//update ship X's position
-			ship.incX(ship.getVelX() * 5);
-			
+			enemy.incX(enemy.getVelX() * 5);
 			//wrap around left/right
-			if(ship.getX() < - 5)
-				ship.setX(5);
-			else if(ship.getX() > 640 + 5)
-				ship.setX(640 - 5);
+			if(enemy.getX() < - 5)
+				enemy.setX(5);
+			else if(enemy.getX() > 640 + 5)
+				enemy.setX(640 - 5);
 			//update ship Y's position
-			ship.incY(ship.getVelY() * 5);
+			enemy.incY(enemy.getVelY() * 3);
 			
 			//wrap around top/bottom
-			if(ship.getY() < -5)
-				ship.setY(5);
-			else if(ship.getY() > 480 + 5)
-				ship.setY(480 - 5);
-			
+			if(enemy.getY() < -5)
+				enemy.setY(5);
+			else if(enemy.getY() > 480 + 5)
+				enemy.setY(480 - 5);
 		}
-		
 		
 	//update foodpoints
 		public void updateFoodPoints(){
@@ -282,61 +355,88 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		ant.setVelY(calcAngleMoveY(ant.getMoveAngle()) * 0.2);
 	}
 	
-	//key listener events
-		public void keyReleased(KeyEvent e){
-				int keyCode = e.getKeyCode();
-				if(keyCode == e.VK_LEFT){
-					ship.setVelX(0);
-					ship.setVelY(0);
-				}
-				if(keyCode == e.VK_RIGHT){
-					ship.setVelX(0);
-					ship.setVelY(0);
-				}
-				if(keyCode == e.VK_UP){
-					ship.setVelX(0);
-					ship.setVelY(0);
-				}
-				if(keyCode == e.VK_DOWN){
-					ship.setVelX(0);
-					ship.setVelY(0);
-				}
+	public void checkCollisions(){
+		for(int i = 0; i < ANTS; i++){
+			Food f = new Food();
+			f = ant[i].checkFood(food);
+			if(f.exists){
+				ant[i].setFaceAngle(getAngle(f.getX(),f.getY(),ant[i]));
+			}
 			
-		}
-		public void keyTyped(KeyEvent k){}
-		public void keyPressed(KeyEvent k){
-			int keyCode = k.getKeyCode();
-			switch(keyCode){
-				case KeyEvent.VK_LEFT:
-					//left arrow rotates ship left 5 degrees
-					ship.setFaceAngle(270);
-					ship.setMoveAngle(ship.getFaceAngle() - 90);
-					ship.setVelX(calcAngleMoveX(ship.getMoveAngle()));
-					ship.setVelY(calcAngleMoveY(ship.getMoveAngle()));
-					break;
-				case KeyEvent.VK_RIGHT:
-					//right arrow rotates ship 5 degrees
-					ship.setFaceAngle(90);
-					ship.setMoveAngle(ship.getFaceAngle() - 90);
-					ship.setVelX(calcAngleMoveX(ship.getMoveAngle()));
-					ship.setVelY(calcAngleMoveY(ship.getMoveAngle()));
-					break;
-				case KeyEvent.VK_UP:
-					//up arrow adds thrust to ship(1/10 normal speed)
-					ship.setFaceAngle(0);
-					ship.setMoveAngle(ship.getFaceAngle() - 90);
-					ship.setVelX(calcAngleMoveX(ship.getMoveAngle()));
-					ship.setVelY(calcAngleMoveY(ship.getMoveAngle()));
-					break;
-				case KeyEvent.VK_DOWN:
-					//up arrow adds thrust to ship(1/10 normal speed)
-					ship.setFaceAngle(180);
-					ship.setMoveAngle(ship.getFaceAngle() - 90);
-					ship.setVelX(calcAngleMoveX(ship.getMoveAngle()));
-					ship.setVelY(calcAngleMoveY(ship.getMoveAngle()));
-					break;
+			if(ant[i].getRadius().intersects(enemy.getBounds()) && ant[i].getBeenChecked() == false){
+				System.out.println("checked");
+				ant[i].checkFaceAngle();
+				//ant[m].setMoveAngle(ant[m].getFaceAngle() - 90);
+				//ant[m].setVelX(calcAngleMoveX(ant[m].getMoveAngle()));
+				//ant[m].setVelY(calcAngleMoveY(ant[m].getMoveAngle()));
+				ant[i].setBeenChecked(true);
+		}	
+		for(int j = i + 1; j < ANTS - 1; j++){
+			if(ant[i].getRadius().intersects(ant[j].getRadius()) 
+					&& (ant[i].getBeenChecked() == true || ant[j].getBeenChecked() == true)){
+						ant[i].checkFaceAngle();
+						ant[j].checkFaceAngle();
+						System.out.println("Ant talk");
+					}	
+				}
 			}
 		}
+	
+	public void keyReleased(KeyEvent e){
+		int keyCode = e.getKeyCode();
+		if(keyCode == e.VK_LEFT){
+			enemy.setVelX(0);
+			enemy.setVelY(0);
+		}
+		if(keyCode == e.VK_RIGHT){
+			enemy.setVelX(0);
+			enemy.setVelY(0);
+		}
+		if(keyCode == e.VK_UP){
+			enemy.setVelX(0);
+			enemy.setVelY(0);
+		}
+		if(keyCode == e.VK_DOWN){
+			enemy.setVelX(0);
+			enemy.setVelY(0);
+		}
+	
+}
+	//key listener events
+	public void keyTyped(KeyEvent k){}
+	public void keyPressed(KeyEvent k){
+		int keyCode = k.getKeyCode();
+		switch(keyCode){
+		case KeyEvent.VK_LEFT:
+			//left arrow rotates ship left 5 degrees
+			enemy.setFaceAngle(270);
+			enemy.setMoveAngle(enemy.getFaceAngle() - 90);
+			enemy.setVelX(calcAngleMoveX(enemy.getMoveAngle()));
+			enemy.setVelY(calcAngleMoveY(enemy.getMoveAngle()));
+			break;
+		case KeyEvent.VK_RIGHT:
+			//right arrow rotates ship 5 degrees
+			enemy.setFaceAngle(90);
+			enemy.setMoveAngle(enemy.getFaceAngle() - 90);
+			enemy.setVelX(calcAngleMoveX(enemy.getMoveAngle()));
+			enemy.setVelY(calcAngleMoveY(enemy.getMoveAngle()));
+			break;
+		case KeyEvent.VK_UP:
+			//up arrow adds thrust to ship(1/10 normal speed)
+			enemy.setFaceAngle(0);
+			enemy.setMoveAngle(enemy.getFaceAngle() - 90);
+			enemy.setVelX(calcAngleMoveX(enemy.getMoveAngle()));
+			enemy.setVelY(calcAngleMoveY(enemy.getMoveAngle()));
+			break;
+		case KeyEvent.VK_DOWN:
+			//up arrow adds thrust to ship(1/10 normal speed)
+			enemy.setFaceAngle(180);
+			enemy.setMoveAngle(enemy.getFaceAngle() - 90);
+			enemy.setVelX(calcAngleMoveX(enemy.getMoveAngle()));
+			enemy.setVelY(calcAngleMoveY(enemy.getMoveAngle()));
+			break;
+	}
+}
 	
 	
 	//calculate X movement value based on direction angle

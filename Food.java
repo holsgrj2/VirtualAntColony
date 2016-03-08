@@ -5,8 +5,8 @@ import java.util.Random;
 public class Food extends BaseVectorShape{
 	//the level of food in the source
 	private int foodLevel;
-	private int [] shipx = {0, -10, -7, 3, 7, 10};
-	private int [] shipy = {-10, -2, 10, 7, 10, -2};
+	private int [] shipx = {0, -8, -8, 0};
+	private int [] shipy = {0, 0, -8, -8};
 	Random r = new Random();
 	//random positions
 	private int randX = r.nextInt(600-6)+ 6;
