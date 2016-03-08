@@ -1,206 +1,86 @@
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.util.Random;
-
-
-public class Ant implements Runnable{
-	//Global variables
-	int x,y, xDirection, yDirection;
-	boolean resting = false;
-	boolean shouldSetRandDir = true;
-	Rectangle ant;
-	Rectangle target = new Rectangle(50,50,15,15);
-	int status = 0;
-
-	public Ant(int x, int y, int status){
-		this.x = x;
-		this.y = y;
-		this.status = status;
-		System.out.println(status);
-		//create 'Ant'
-		ant = new Rectangle(this.x, this.y, 5, 5);
+import java.util.ArrayList;
+import java.awt.geom.Point2D;
+//Ship class - polygonal shape of the player's ship
+public class Ant extends BaseVectorShape{
+	//define the polygon
+	private int [] antx = {-3, -1, 0, 1, 3, 0};
+	private int [] anty = {3, 3, 3, 3, 3, -3};
+	//define arraylist of breadcrumbs for finding nest
+	private ArrayList<Point2D.Double> breadcrumbs = new ArrayList<Point2D.Double>();
+	//value for food
+	private boolean hasFood;
+	//value for incrementing through breadcrumbs on way home
+	private int distNest;
+	//the distance an ant can search
+	private double searchRadius = 5.0;
+	//bounding rectangle
+	public Rectangle getBounds(){
+		Rectangle r;
+		r = new Rectangle((int)getX() - 6, (int)getY() - 6, 12,12);
+		return r;
 	}
-		public int chooseRandomDirection(){
-			Random r = new Random();
-			int [] randDirections = new int[3];
-			randDirections[0] = 0;
-			randDirections[1] = 1;
-			randDirections[2] = -1;
-			int randChoice = r.nextInt(3);//generates 0,1 or 2
-			return randDirections[randChoice];
-		}
-		//In run method move in that direction and wait
+	Ant(){
+		setShape(new Polygon(antx,anty,antx.length));
+		setAlive(true);
+		distNest = 0;
+		hasFood = false;
 		
-	public void setXDirection(int xdir){
-		xDirection = xdir;
-	}
-	
-	public void setYDirection(int ydir){
-		yDirection = ydir;
-	}
-	
-	public void draw(Graphics g){
-		g.setColor(Color.BLACK);
-		g.fillRect(ant.x, ant.y, ant.width, ant.height);
-	}
-	
-	public void collisionWithEnemy(){
-		if(ant.intersects(target)){
-			ant.x = ant.x;
-			ant.y = ant.y;
-		}	
-	}
-	
-	public void move(){
-		//collision();
-		ant.x += xDirection;
-		ant.y += yDirection;
 		
-		//Bounce Ant when edge detected
-		if(ant.x <= 0){
-			setXDirection(+1);
-		}	
-		if(ant.x >= 690){
-			setXDirection(-1);
-		}
-		if(ant.y <= 10)
-			setYDirection(+1);
-		if(ant.y >= 590)
-			setYDirection(-1);
 	}
-	
-	public void findPathToTarget(){
-		if(ant.x < target.x){
-			setXDirection(1);
-		}
-		if(ant.x > target.x){
-			setXDirection(-1);
-		}
-		if(ant.y < target.y){
-			setYDirection(1);
-		}
-		if(ant.y > target.y){
-			setYDirection(-1);
-		}
+	//add crumbs for every scouting step
+	public void putBreadcrumb(){
+		breadcrumbs.add(new Point2D.Double(getX(), getY()));
+		distNest++;
 	}
-	
-	public void antBorder(Ant a){
-		if (ant.intersects(a.ant) && ant.x > a.ant.x){
-			ant.x += 10;
-		}
-		
-		if (ant.intersects(a.ant) && ant.x < a.ant.x){
-			ant.x -= 10;
-		}
-		
-		if (ant.intersects(a.ant) && ant.y > a.ant.y){
-			ant.y += 10;
-		}
-		
-		if (ant.intersects(a.ant) && ant.y < a.ant.y){
-			ant.y -= 10;
-		}
+	//set food to true if ant has found food
+	public void takeFood(){ hasFood=true;}
+	//check if ant has food
+	public boolean foodState(){ return hasFood;}
+	//get next step to home
+	public Point2D.Double getNestMove(){
+		Point2D.Double breadcrumb = breadcrumbs.get(distNest);
+		distNest--;
+		return breadcrumb;
 	}
-	
-	public void findPathToAnt(Ant a){
-		if(ant.x < a.x){
-			setXDirection(1);
+	//return the strongest foodpoint in range, if none found return a foodpoint located at (0.0,0.0)
+	public FoodPoint searchFoodPoint(ArrayList<FoodPoint> foodpoints){
+		FoodPoint bestPoint = new FoodPoint(0);
+		int strongest = 0;
+		for(int i = 0; i < foodpoints.size();i++)
+		{
+			double x = foodpoints.get(i).getFoodX();
+			double y = foodpoints.get(i).getFoodY();
+			if(isInRadius(x,y)){
+				if(foodpoints.get(i).getStrength() > strongest){
+					bestPoint = foodpoints.get(i);
+					strongest = foodpoints.get(i).getStrength();
+				}		
+			}
 		}
-		if(ant.x > a.x){
-			setXDirection(-1);
-		}
-		if(ant.y < a.y){
-			setYDirection(1);
-		}
-		if(ant.y > a.y){
-			setYDirection(-1);
-		}
+		return bestPoint;
 	}
-	
-	/*public void moveRandom(){
-		try{
-			while(true){
-				if(!resting){
-					if(shouldSetRandDir){
-					setXDirection(chooseRandomDirection());
-					setYDirection(chooseRandomDirection());
-					shouldSetRandDir = false;
-					}
-					long start = System.currentTimeMillis();
-					long end = start + 1 * 1000;
-					while(System.currentTimeMillis() < end){
-							move();
-							System.out.println(ant.x + " " + ant.y);
-							//System.out.println((Math.sqrt(Math.pow((target.x - Ant.x), 2) + 
-								//	Math.pow((target.y - Ant.y), 2))));
-						Thread.sleep(10);
-					}
-					resting = true;
-				}					
-				else{
-					
-					shouldSetRandDir = true;
-					resting = false;
+	//check for any food in radius, if none found return a food object located at (0.0,0.0)
+	public Food checkFood(Food [] food)
+	{
+		Food bestFood = new Food(0);
+		int highestFood = 0;
+		for(int i = 0; i <= 5; i++){
+			if(isInRadius(food[i].getX(),food[i].getY())){
+				if(food[i].getFoodLevel() > highestFood){
+					bestFood = food[i];
+					highestFood = food[i].getFoodLevel();
 				}
 			}
-			
 		}
-		catch(Exception ex){
-			System.err.println(ex.getMessage());
-		}
-	}*/
-	
-	public void moveRandom(){
-		try{
-			while(true){
-				if(!resting){
-					if(shouldSetRandDir){
-					setXDirection(chooseRandomDirection());
-					setYDirection(chooseRandomDirection());
-					shouldSetRandDir = false;
-					}
-					long start = System.currentTimeMillis();
-					long end = start + 1 * 1000;
-					while(System.currentTimeMillis() < end){
-						if((Math.sqrt(Math.pow((target.x - ant.x), 2) + 
-								Math.pow((target.y - ant.y), 2))) < 100 || status == 1){
-							status = 1;
-							findPathToTarget();
-							collisionWithEnemy();
-							move();
-							System.out.println(ant.x + " " + ant.y);
-						}
-						else{
-							collisionWithEnemy();
-							move();
-							System.out.println(ant.x + " " + ant.y);
-							//System.out.println((Math.sqrt(Math.pow((target.x - Ant.x), 2) + 
-								//	Math.pow((target.y - Ant.y), 2))));
-						}	
-						Thread.sleep(10);
-					}
-					resting = true;
-				}					
-				else{
-					
-					shouldSetRandDir = true;
-					resting = false;
-				}
-			}
-			
-		}
-		catch(Exception ex){
-			System.err.println(ex.getMessage());
-		}
+		return bestFood;
+	}
+	public boolean isInRadius(double x,double y){
+		if(((x - getX()) * (x - getX())) + ((y - getY()) * (y - getY())) < searchRadius * searchRadius)
+			return true;
+		else
+			return false;
 	}
 	
-	public void run() {
-		try{
-			while(true){
-				moveRandom();
-				Thread.sleep(4);
-			}
-		} catch(Exception e){ System.err.println(e.getMessage());}
-	}
 }
