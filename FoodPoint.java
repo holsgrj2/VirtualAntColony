@@ -9,7 +9,7 @@ public class FoodPoint{
 		strength = 1000;
 		exists = true;
 	}
-	FoodPoint(int x){
+	FoodPoint(){
 		exists = false;
 	}
 	//decrement strength
@@ -18,9 +18,9 @@ public class FoodPoint{
 	//increment strength
 	public void incrementStr(){strength += 500;}
 	//accessors
-	public double getFoodX(){return Coords.x;}
-	public double getFoodY(){return Coords.y;}
+	public double getX(){return Coords.x;}
+	public double getY(){return Coords.y;}
 	public int getStrength(){return strength;}
-	public boolean checkExist(){return exists;}
+	public boolean checkExists(){return exists;}
 	
 }

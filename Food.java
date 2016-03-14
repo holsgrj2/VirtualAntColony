@@ -35,6 +35,7 @@ public class Food extends BaseVectorShape{
 	//create a food object with no values
 	Food(int x){
 		exists = false;
+		foodLevel = 0;
 	}
 	public void removeFood(){foodLevel--;}
 	public int getFoodLevel(){return foodLevel;}
