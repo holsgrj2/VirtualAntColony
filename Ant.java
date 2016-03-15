@@ -156,7 +156,7 @@ public class Ant extends BaseVectorShape {
 
 	// return the strongest foodpoint in range, if none found return a foodpoint
 	// located at (0.0,0.0)
-	public FoodPoint searchPath(ArrayList<ArrayList<FoodPoint>> paths, Food[] food) {
+	public FoodPoint searchPath(ArrayList<ArrayList<FoodPoint>> paths, Food[] food, Nest n) {
 		// System.out.println("onTrail : " + onTrail + ", hasFood: " + hasFood +
 		// "onDeadPath: " + onDeadPath + "found food:" + checkFood(food));
 		// System.out.println(hasFood);
@@ -183,8 +183,8 @@ public class Ant extends BaseVectorShape {
 			}
 		} else if (onTrail && hasFood) { // going back after finding food
 			System.out.println("got food");
-			// if(distNest-- < 0)
-			// distNest = 0;
+			if(distNest ==1)
+				n.addStock();
 			FoodPoint goodTrail = getNestMove(); // get next step to home
 			goodTrail.incrementStr(); // increment strength along the way
 			return goodTrail;
@@ -218,7 +218,7 @@ public class Ant extends BaseVectorShape {
 					double x = path.get(j).getX();
 					double y = path.get(j).getY();
 					int strength = path.get(j).getStrength();
-					if (isInRadius(x, y)) { // if in radius the pheromone is
+					if (isInRadius(x, y) ) { // if in radius the pheromone is
 											// within range of the ant
 						if (strength > strongest) { // if multiple trails choose
 													// the strongest one
@@ -243,14 +243,14 @@ public class Ant extends BaseVectorShape {
 		}
 	}
 
-	public double searchAngle(ArrayList<ArrayList<FoodPoint>> paths, Food[] food) { // get
+	public double searchAngle(ArrayList<ArrayList<FoodPoint>> paths, Food[] food, Nest n) { // get
 																					// any
 																					// angles
 																					// found,
 																					// otherwise
 																					// random
 																					// angle
-		FoodPoint search = searchPath(paths, food);
+		FoodPoint search = searchPath(paths, food, n);
 		if (search.checkExists())
 			return getAngle(search);
 		else {

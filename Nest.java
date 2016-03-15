@@ -6,6 +6,7 @@ public class Nest extends BaseVectorShape{
 	private int [] shipx = {0, -25, -40, -25, 0, 14};
 	private int [] shipy = {0, 0, -20, -40, -40, -20};
 	
+	
 	//bounding rectangle
 	public Rectangle getBounds(){
 		Rectangle r;
@@ -19,5 +20,6 @@ public class Nest extends BaseVectorShape{
 		setY(260);
 	}
 	public void addStock(){foodStock++;}
+	public int getStock(){ return foodStock;}
 	public void feed(){if(foodStock>0) foodStock--;}
 }

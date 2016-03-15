@@ -80,8 +80,8 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		g2d.fillRect(0,0,getSize().width,getSize().height);
 		
 		//print some status information
-		//g2d.setColor(Color.WHITE);
-		//g2d.drawString("Ship: " + Math.round(ant.getX()) + "," + Math.round(ant.getY()), 5, 10);
+		g2d.setColor(Color.WHITE);
+		g2d.drawString("Food Stock: " + nest.getStock(), 5, 10);
 		//g2d.drawString("Move angle: " + Math.round(ant.getMoveAngle()) + 90,5,25);
 		//g2d.drawString("Face angle: " + Math.round(ant.getFaceAngle()), 5, 40);
 		
@@ -180,6 +180,7 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 	//applet window repaint event -- draw the back buffer
 	public void paint(Graphics g){
 		//draw the back buffer onto the applet window
+		this.setSize(640, 480);
 		g.drawImage(backbuffer, 0, 0, this);
 	}
 	//thread start event - start the game loop running
@@ -279,7 +280,7 @@ public void getAway(Enemy e, Ant a){
 				//	System.out.println("unchecked");
 				}
 				
-				ant[i].setFaceAngle(ant[i].searchAngle(paths, food));
+				ant[i].setFaceAngle(ant[i].searchAngle(paths, food, nest));
 				//System.out.println(ant[i].getDistnest());
 			}
 			
