@@ -9,7 +9,7 @@ public class Nest extends BaseVectorShape{
 	//bounding rectangle
 	public Rectangle getBounds(){
 		Rectangle r;
-		r = new Rectangle((int)getX() - 6, (int)getY() - 6, 12,12);
+		r = new Rectangle((int)getX() - 44, (int)getY() - 46, 62,54);
 		return r;
 	}
 	Nest(){

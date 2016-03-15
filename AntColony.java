@@ -102,8 +102,14 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 			g2d.setColor(Color.WHITE);
 			g2d.draw(enemy.getBounds());
 			for(int i = 0; i < ANTS; i++){
-				//g2d.draw(ant[i].getRadius());
-				g2d.draw(ant[i].getDangerPheromone());
+				g2d.draw(ant[i].getBounds());
+				//g2d.draw(ant[i].getFoodRadius());
+				g2d.draw(ant[i].getRadius());
+				//g2d.draw(ant[i].getDangerPheromone());
+			}
+			for(int j = 0; j < FOODS; j++){
+				g2d.setColor(Color.WHITE);
+				g2d.draw(food[j].getBounds());
 			}
 		}
 	}
@@ -135,20 +141,27 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 			g2d.setTransform(identity);
 			g2d.translate(food[i].getX(),food[i].getY());
 			g2d.rotate(Math.toRadians(food[i].getFaceAngle()));
-			g2d.setColor(Color.BLUE);
-			if(food[i].getFoodLevel() > 0)
-				g2d.fill(food[i].getShape());
+			if(food[i].getFoodLevel() == 0){
+				g2d.setColor(Color.BLACK);
+				food[i].setNotExist();
+			}
+			else
+				g2d.setColor(Color.BLUE);
+			g2d.fill(food[i].getShape());
 		}
 	}
 	
 	public void drawBreadcrumbs(){
 		for(int i = 0; i < paths.size(); i++){
 			ArrayList<FoodPoint> path = paths.get(i);
-			for(int j = 0; j < path.size() - 1; j++){
+			for(int j = 0; j < path.size(); j++){
 				double x = path.get(j).getX();
 				double y = path.get(j).getY();
-				g2d.setColor(Color.WHITE);
-				g2d.fillRect((int)x,(int)y,2,2);
+				path.get(j).decrementStr();
+				if(path.get(j).checkExists()){
+					g2d.setColor(Color.WHITE);
+					g2d.fillRect((int)x,(int)y,2,2);
+				}
 			}
 		}
 	}
@@ -159,6 +172,7 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		g2d.setColor(Color.GREEN);
 	    g2d.setStroke(new BasicStroke(5));
 		g2d.draw(nest.getShape());
+		g2d.setStroke(new BasicStroke(1));
 	}
 
 	//applet window repaint event -- draw the back buffer
@@ -264,7 +278,7 @@ public void getAway(Enemy e, Ant a){
 				}
 				
 				ant[i].setFaceAngle(ant[i].searchAngle(paths, food));
-				System.out.println(ant[i].getDistnest());
+				//System.out.println(ant[i].getDistnest());
 			}
 			
 			//System.out.println(ant[i].getOnWayHome());
@@ -324,10 +338,15 @@ public void getAway(Enemy e, Ant a){
 				enemy.setY(480 - 5);
 		}
 		
-	//update foodpoints
+		//update foodpoints
 		/*public void updateFoodPoints(){
-			for(int i = 0; i < foodpoints.size(); i++)
-				foodpoints.get(i).decrementStr();
+			for(int i = 0; i < paths.size(); i++){
+				ArrayList<FoodPoint> path = paths.get(i);
+				for(int j = 0; j < path.size(); j++){
+					FoodPoint f = path.get(j);
+					f.decrementStr();
+				}
+			}
 		}*/
 		
 	//keeps face angle in range 0-360
@@ -363,14 +382,16 @@ public void getAway(Enemy e, Ant a){
 				//ant[m].setVelY(calcAngleMoveY(ant[m].getMoveAngle()));
 				ant[i].setBeenChecked(true);
 		}	
-		for(int j = i + 1; j < ANTS - 1; j++){
-			if(ant[i].getRadius().intersects(ant[j].getRadius()) 
-					&& (ant[i].getBeenChecked() == true || ant[j].getBeenChecked() == true)){
-						ant[i].checkFaceAngle();
-						ant[j].checkFaceAngle();
-						System.out.println("Ant talk");
-					}	
-				}
+	/*	for(int j = i + 1; j < ANTS - 1; j++){
+			if(ant[i].getRadius().intersects(ant[j].getRadius())){
+					if(ant[i].getOnTrail() == true){
+						ant[j].setOnTrail(true);
+						}
+					if(ant[j].getOnTrail() == true){
+						ant[i].setOnTrail(true);
+						}
+					}
+				}*/
 			}
 		}
 	

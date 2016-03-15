@@ -16,7 +16,7 @@ public class Food extends BaseVectorShape{
 	//bounding rectangle
 	public Rectangle getBounds(){
 		Rectangle r;
-		r = new Rectangle((int)getX() - 6, (int)getY() - 6, 12,12);
+		r = new Rectangle((int)getX() - 9, (int)getY() - 9, 10,10);
 		return r;
 	}
 	Food(){
@@ -37,10 +37,8 @@ public class Food extends BaseVectorShape{
 		exists = false;
 		foodLevel = 0;
 	}
-	public void removeFood(){
-		foodLevel--;
-		exists = false;
-	}
+	public void removeFood(){foodLevel--;}
 	public int getFoodLevel(){return foodLevel;}
 	public boolean checkExist(){return exists;}
+	public void setNotExist(){exists = false;}
 }
