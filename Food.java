@@ -37,7 +37,10 @@ public class Food extends BaseVectorShape{
 		exists = false;
 		foodLevel = 0;
 	}
-	public void removeFood(){foodLevel--;}
+	public void removeFood(){
+		foodLevel--;
+		exists = false;
+	}
 	public int getFoodLevel(){return foodLevel;}
 	public boolean checkExist(){return exists;}
 }

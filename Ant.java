@@ -23,6 +23,8 @@ public class Ant extends BaseVectorShape{
 	private int distNest;
 	//the distance an ant can search
 	private double searchRadius = 5;
+	//value for telling if on a path with no food
+	private boolean deadPath;
 	//bounding rectangle
 	
 	public Rectangle getBounds(){
@@ -50,6 +52,7 @@ public class Ant extends BaseVectorShape{
 		hasFood = false;
 		onWayHome = false;
 		beenChecked = false;
+		deadPath = false;
 		onTrail = false;
 	}
 	
@@ -105,6 +108,7 @@ public class Ant extends BaseVectorShape{
 			onWayHome = false;
 			hasFood = false;
 			onTrail = false;
+			deadPath = false;
 			breadcrumb = breadcrumbs.get(0);
 			breadcrumbs.clear(); //clear the breadcrumbs to start new random or new path
 			return breadcrumb;
@@ -129,8 +133,8 @@ public class Ant extends BaseVectorShape{
 				return nearFood;
 			}
 			else{
-				onTrail = false;			//move off the trail and move randomly if not
-				return noPoint;
+				deadPath = true;			//move off the trail and move randomly if not
+				return getNestMove();
 			}
 		}
 		else if(onTrail && hasFood){		//going back after finding food
@@ -140,7 +144,10 @@ public class Ant extends BaseVectorShape{
 			FoodPoint goodTrail = getNestMove(); // get next step to home
 			goodTrail.incrementStr();  //increment strength along the way
 			return goodTrail;
+			
 		}
+		else if(deadPath)
+			return getNestMove();
 		else if(!onTrail && !hasFood && nearFood.checkExists()){
 			
 			paths.add(new ArrayList<FoodPoint>(breadcrumbs));	//create a new path for other ants to find
@@ -198,8 +205,10 @@ public class Ant extends BaseVectorShape{
 			}
 		}
 		FoodPoint nearFood = new FoodPoint();
-		if(bestFood.exists)
+		if(bestFood.exists){
+			bestFood.removeFood();
 			nearFood = new FoodPoint(bestFood.getX(),bestFood.getY());
+		}
 		return nearFood;
 	}
 	public boolean isInRadius(double x,double y){	//uses pythagoras theorem to find any points within or touching a circle around an ant
