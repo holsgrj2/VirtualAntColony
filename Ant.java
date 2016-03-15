@@ -35,7 +35,9 @@ public class Ant extends BaseVectorShape {
 		r = new Rectangle((int) getX() - 6, (int) getY() - 6, 12, 12);
 		return r;
 	}
-
+	public boolean getDeadPath(){
+		return onDeadPath;
+	}
 	public Rectangle getFoodRadius() {
 		Rectangle r;
 		r = new Rectangle((int) getX() - 7, (int) getY() - 7, 15, 15);
@@ -135,8 +137,7 @@ public class Ant extends BaseVectorShape {
 			onWayHome = false;
 			hasFood = false;
 			onTrail = false;
-			if (onDeadPath)
-				onDeadPath = false;
+			onDeadPath = false;
 			breadcrumb = breadcrumbs.get(0);
 			breadcrumbs.clear(); // clear the breadcrumbs to start new random or
 									// new path
@@ -167,17 +168,18 @@ public class Ant extends BaseVectorShape {
 		// location as food
 		if (onTrail && !hasFood && !onDeadPath) { // ant is on trail & moving
 													// towards the food
-			if (distNest < breadcrumbs.size()) // if not at end get the next
+			if (distNest < breadcrumbs.size()-1) // if not at end get the next
 												// move on trail
 				return getFoodMove();
 			else if (nearFood.getFoodLevel() > 0) { // when at end check for any
-													// food
+				nearFood.removeFood();									// food
 				System.out.println("food here");
 				hasFood = true;// set true if there is
 				return getNestMove();
 			} else {
 				// move off the trail and move randomly if not
-				return noPoint;
+				onDeadPath = true;
+				return getNestMove();
 			}
 		} else if (onTrail && hasFood) { // going back after finding food
 			System.out.println("got food");
@@ -190,9 +192,11 @@ public class Ant extends BaseVectorShape {
 			System.out.println("on Dead Path");
 			// if(distNest-- < 0)
 			// distNest = 0;
-			FoodPoint goodTrail = getNestMove(); // get next step to home
-			return goodTrail;
-		} else if (!onTrail && !hasFood && nearFood.getFoodLevel() > 0) {
+			 // get next step to home
+			return getNestMove();
+		}
+		else if (!onTrail && !hasFood && nearFood.getFoodLevel() > 0) {
+			putBreadcrumb();
 			paths.add(new ArrayList<FoodPoint>(breadcrumbs)); // create a new
 																// path for
 																// other ants to
@@ -220,7 +224,7 @@ public class Ant extends BaseVectorShape {
 													// the strongest one
 							distNest = j--; // set the dist to 1 away from the
 											// current index
-							breadcrumbs = new ArrayList<FoodPoint>(path); // make
+							breadcrumbs = cloneList(path); // make
 																			// breadcrumbs
 																			// a
 																			// copy
@@ -277,6 +281,16 @@ public class Ant extends BaseVectorShape {
 		else
 			return (((x - getX()) * (x - getX())) + ((y - getY()) * (y - getY())) <= 15 * 15);
 	}
+	public ArrayList<FoodPoint> cloneList(ArrayList<FoodPoint> list){
+		ArrayList<FoodPoint> clone = new ArrayList<FoodPoint>();
+		for(int i = 0; i < list.size(); i++){
+			double x = list.get(i).getX();
+			double y = list.get(i).getY();
+			int z = list.get(i).getStrength();
+			clone.add(new FoodPoint(x,y,z));
+		}
+		return clone;
+	}
 
 	public double getAngle(FoodPoint f) { // compute the angle towards the
 											// foodpoint passed
@@ -289,3 +303,4 @@ public class Ant extends BaseVectorShape {
 		return angle;
 	}
 }
+	

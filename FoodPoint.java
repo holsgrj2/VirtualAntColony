@@ -9,21 +9,27 @@ public class FoodPoint{
 		strength = 1000;
 		exists = true;
 	}
+	FoodPoint(double x,double y,int z){
+		Coords = new Point2D.Double(x,y);
+		strength = 1000;
+		exists = true;
+		strength = z;
+	}
 	FoodPoint(){
 		exists = false;
 	}
 	//decrement strength
 	public void decrementStr(){
-		strength-=0;
+		strength-=2;
 		if(strength <= 0)
 			exists = false;
 	}
 	
 	//increment strength
 	public void incrementStr(){
-		strength += 0;
-		if(strength > 2200)
-			strength = 2200;
+		strength += 60;
+		if(strength > 3000)
+			strength = 3000;
 	}
 	//accessors
 	public double getX(){return Coords.x;}

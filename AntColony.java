@@ -122,6 +122,8 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 			g2d.rotate(Math.toRadians(ant[i].getFaceAngle()));
 			if(ant[i].getHasFood())
 				g2d.setColor(Color.GREEN);
+			else if(ant[i].getDeadPath())
+				g2d.setColor(Color.CYAN);
 			else
 				g2d.setColor(Color.RED);
 			g2d.fill(ant[i].getShape());
