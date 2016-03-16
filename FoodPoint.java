@@ -20,7 +20,7 @@ public class FoodPoint{
 	}
 	//decrement strength
 	public void decrementStr(){
-		strength-=4;
+		strength-=6;
 		if(strength <= 0){
 			exists = false;
 			strength = 0;
@@ -32,13 +32,14 @@ public class FoodPoint{
 		if(strength == 0)
 			exists = true;
 		strength += 1000;
-		if(strength >= 7000)
-			strength = 7000;
+		if(strength >= 6000)
+			strength = 6000;
 	}
 	//accessors
 	public double getX(){return Coords.x;}
 	public double getY(){return Coords.y;}
 	public int getStrength(){return strength;}
 	public boolean checkExists(){return exists;}
+	public void setExist(){exists = true;}
 	
 }

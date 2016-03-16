@@ -1,10 +1,10 @@
 import java.awt.Polygon;
 import java.awt.Rectangle;
-//Ship class - polygonal shape of the player's ship
+//Enemy class - polygonal shape of the player's enemy
 public class Enemy extends BaseVectorShape{
 	//define the polygon
-	private int [] shipx = {0, -10, -7, 3, 7, 10};
-	private int [] shipy = {-10, -2, 10, 7, 10, -2};
+	private int [] enemyx = {0, -10, -7, 3, 7, 10};
+	private int [] enemyy = {-10, -2, 10, 7, 10, -2};
 	
 	//bounding rectangle
 	public Rectangle getBounds(){
@@ -13,7 +13,7 @@ public class Enemy extends BaseVectorShape{
 		return r;
 	}
 	Enemy(){
-		setShape(new Polygon(shipx,shipy,shipx.length));
+		setShape(new Polygon(enemyx,enemyy,enemyx.length));
 		setAlive(true);
 	}
 }

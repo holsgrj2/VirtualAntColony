@@ -13,6 +13,9 @@ public class Ant extends BaseVectorShape {
 	Random r = new Random();
 	// value for food
 	private boolean hasFood;
+	
+	boolean decrement;
+	
 	private boolean beenChecked;
 	// value for telling if ant is on a trail
 	private boolean onTrail;
@@ -52,6 +55,14 @@ public class Ant extends BaseVectorShape {
 		beenChecked = false;
 		onTrail = false;
 	}
+	
+	public boolean getDecrement(){
+		return decrement;
+	}
+	
+	public void setDecrement(boolean b){
+		this.decrement = b;
+	}
 
 	public void checkFaceAngle() {
 		double faceAngle = getFaceAngle();
@@ -78,7 +89,9 @@ public class Ant extends BaseVectorShape {
 	// get next step to home
 	public FoodPoint getNestMove() {
 		FoodPoint breadcrumb;
-		distNest--;
+		if(decrement){
+			distNest--;
+		}
 		if (distNest <= 0) {									// if distNest is less than 0 then the next step is home, set ant back to scout state
 			hasFood = false;
 			onTrail = false;
@@ -205,4 +218,3 @@ public class Ant extends BaseVectorShape {
 		return angle;
 	}
 }
-	

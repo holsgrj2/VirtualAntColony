@@ -23,8 +23,9 @@ public class Food extends BaseVectorShape{
 		setShape(new Polygon(shipx,shipy,shipx.length));
 		foodLevel = r.nextInt(100-5) + 5; //random food value
 		while(true){
-			if(((randX-320)^2 + (randY - 240)^2) > (50 ^ 2)) //make sure food is not drawn too close to nest
+			if(((randX-320)^2 + (randY - 240)^2) > (50 ^ 2)){ //make sure food is not drawn too close to nest
 				break;
+			}	
 			randX = r.nextInt(600-6)+ 6;
 			randY = r.nextInt(400-6)+ 6;
 		}
