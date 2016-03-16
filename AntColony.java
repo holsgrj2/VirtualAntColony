@@ -219,7 +219,6 @@ public class AntColony extends Applet implements Runnable, KeyListener {
 		checkCollisions();
 		updateAnt();
 		updateEnemy();
-		//updateFoodPoints();
 	}
 	
 	public void changeDirection(Ant ant){
@@ -269,28 +268,22 @@ public void getAway(Enemy e, Ant a){
 			double faceAngle = ant[i].getFaceAngle();
 		
 			if(resting == 1){//how many steps before ant changes the way it is facing.
-				//System.out.println(resting);
 				if(i == ANTS - 1){
 					resting = 0;
 				}
 				
 				if(getDistanceToEnemy(enemy, ant[i]) > 15 && ant[i].getBeenChecked() == true){
 					ant[i].setBeenChecked(false);
-				//	System.out.println(getDistance(enemy, ant[i]));
-				//	System.out.println("unchecked");
 				}
 				
 				ant[i].setFaceAngle(ant[i].searchAngle(paths, food, nest));
-				//System.out.println(ant[i].getDistnest());
 			}
 			
-			//System.out.println(ant[i].getOnWayHome());
 			
 			
 			
 			//update ship X's position, distance the ant moves in one step
 			ant[i].incX(ant[i].getVelX() * 5);
-			//System.out.println(ant.getVelX());
 		
 			//collide with left/right edge
 			if(ant[i].getX() < - 5){
@@ -305,8 +298,6 @@ public void getAway(Enemy e, Ant a){
 			}		
 			//update ship Y's position
 			ant[i].incY(ant[i].getVelY() * 5);
-			//System.out.println(ant.getVelY());
-		
 		
 			//wrap around top/bottom
 			if(ant[i].getY() < -5){
@@ -341,17 +332,6 @@ public void getAway(Enemy e, Ant a){
 				enemy.setY(480 - 5);
 		}
 		
-		//update foodpoints
-		/*public void updateFoodPoints(){
-			for(int i = 0; i < paths.size(); i++){
-				ArrayList<FoodPoint> path = paths.get(i);
-				for(int j = 0; j < path.size(); j++){
-					FoodPoint f = path.get(j);
-					f.decrementStr();
-				}
-			}
-		}*/
-		
 	//keeps face angle in range 0-360
 	public void checkFaceAngle(double faceAngle){
 		if(faceAngle > 180){
@@ -371,12 +351,6 @@ public void getAway(Enemy e, Ant a){
 	
 	public void checkCollisions(){
 		for(int i = 0; i < ANTS; i++){
-			Food f = new Food();
-			//f = ant[i].checkFood(food);
-			//if(f.exists){
-				//ant[i].setFaceAngle(getAngle(f.getX(),f.getY(),ant[i]));
-			//}
-			
 			if(ant[i].getRadius().intersects(enemy.getBounds()) && ant[i].getBeenChecked() == false){
 				System.out.println("checked");
 				ant[i].checkFaceAngle();
