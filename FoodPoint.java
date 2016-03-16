@@ -20,16 +20,20 @@ public class FoodPoint{
 	}
 	//decrement strength
 	public void decrementStr(){
-		strength-=2;
-		if(strength <= 0)
+		strength-=4;
+		if(strength <= 0){
 			exists = false;
+			strength = 0;
+		}
 	}
 	
 	//increment strength
 	public void incrementStr(){
-		strength += 60;
-		if(strength > 3000)
-			strength = 3000;
+		if(strength == 0)
+			exists = true;
+		strength += 1000;
+		if(strength >= 7000)
+			strength = 7000;
 	}
 	//accessors
 	public double getX(){return Coords.x;}

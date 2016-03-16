@@ -28,6 +28,8 @@ public class Ant extends BaseVectorShape {
 	private double searchRadius = 3;
 	// boolean for checking if no food around
 	private boolean onDeadPath;
+	//int for keeping which path the ant is on
+	private int pathIndex;
 	// bounding rectangle
 
 	public Rectangle getBounds() {
@@ -186,7 +188,7 @@ public class Ant extends BaseVectorShape {
 			if(distNest ==1)
 				n.addStock();
 			FoodPoint goodTrail = getNestMove(); // get next step to home
-			goodTrail.incrementStr(); // increment strength along the way
+			paths.get(pathIndex).get(distNest).incrementStr(); // increment strength along the way
 			return goodTrail;
 		} else if (onTrail && onDeadPath) { // going back after finding food
 			System.out.println("on Dead Path");
@@ -197,13 +199,15 @@ public class Ant extends BaseVectorShape {
 		}
 		else if (!onTrail && !hasFood && nearFood.getFoodLevel() > 0) {
 			putBreadcrumb();
-			paths.add(new ArrayList<FoodPoint>(breadcrumbs)); // create a new
+			paths.add(new ArrayList<FoodPoint>(breadcrumbs)); 
+			pathIndex = paths.size() - 1;
+			FoodPoint nestMove = getNestMove();
 																// path for
 																// other ants to
 																// find
 			onTrail = true; // set for returning home
 			hasFood = true;
-			return getNestMove();
+			return nestMove;
 		}
 
 		else { // otherwise check for any trails within range of the ant
@@ -231,6 +235,7 @@ public class Ant extends BaseVectorShape {
 																			// of
 																			// the
 																			// path
+							pathIndex = i;
 							onTrail = true; // ant will now be on a trail
 							strongest = strength;
 							System.out.println("Found Trail");
